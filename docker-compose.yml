@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  tor-proxy:
+    image: ghcr.io/andrew-stclair/tor-socks:latest
+    container_name: tor-socks
+    restart: unless-stopped
+    ports:
+      - "9050:9050"  # SOCKS proxy port
+      - "9051:9051"  # Control port
+    # For readonly filesystem support with tmpfs mounts
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/tmp
+    volumes:
+      - tor-data:/var/lib/tor
+    # Security options for rootless operation
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+  # Example application using the Tor proxy
+  example-app:
+    image: curlimages/curl:latest
+    command: >
+      sh -c "
+      echo 'Testing Tor proxy connectivity...';
+      sleep 10;
+      curl --socks5-hostname tor-proxy:9050 https://check.torproject.org/api/ip;
+      echo '';
+      echo 'Sleeping to keep container running...';
+      sleep infinity
+      "
+    depends_on:
+      - tor-proxy
+    environment:
+      - http_proxy=socks5h://tor-proxy:9050
+      - https_proxy=socks5h://tor-proxy:9050
+
+volumes:
+  tor-data:

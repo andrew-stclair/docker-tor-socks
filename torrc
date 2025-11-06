@@ -1,0 +1,30 @@
+# Tor SOCKS Proxy Configuration
+# This configuration sets up Tor as a SOCKS proxy only
+# It does NOT function as a relay, exit node, or bridge
+
+# SOCKS proxy configuration
+# Binding to 0.0.0.0 allows access from other containers (sidecar use case)
+# For single-container use, consider changing to 127.0.0.1:9050
+SocksPort 0.0.0.0:9050
+SocksPolicy accept *
+
+# Control port configuration
+# Binding to 0.0.0.0 allows access from other containers (sidecar use case)
+# For production use, consider:
+# 1. Binding to 127.0.0.1:9051 for single-container use
+# 2. Adding HashedControlPassword for authentication
+# 3. Using CookieAuthentication 1 for cookie-based auth
+ControlPort 0.0.0.0:9051
+
+# Disable relay functionality - do NOT route traffic for others
+ORPort 0
+ExitRelay 0
+
+# Explicitly disable being an exit node
+ExitPolicy reject *:*
+
+# Data directory
+DataDirectory /var/lib/tor
+
+# Logging
+Log notice stdout
