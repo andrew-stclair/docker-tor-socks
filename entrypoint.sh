@@ -27,8 +27,6 @@ if [ -n "$TOR_CONTROL_PASSWORD" ]; then
         exit 1
     fi
     
-    HASHED_PASSWORD="$HASH_OUTPUT"
-    
     # Create modified torrc in /tmp (writable with read-only filesystem)
     TORRC_PATH="/tmp/torrc"
     if ! cp /etc/tor/torrc "$TORRC_PATH"; then
@@ -37,7 +35,7 @@ if [ -n "$TOR_CONTROL_PASSWORD" ]; then
     fi
     
     # Add HashedControlPassword to the config
-    if ! echo "HashedControlPassword $HASHED_PASSWORD" >> "$TORRC_PATH"; then
+    if ! echo "HashedControlPassword $HASH_OUTPUT" >> "$TORRC_PATH"; then
         echo "Error: Failed to write HashedControlPassword to torrc" >&2
         exit 1
     fi
@@ -45,7 +43,8 @@ if [ -n "$TOR_CONTROL_PASSWORD" ]; then
     echo "ControlPort authentication enabled"
 else
     echo "Warning: ControlPort has no authentication configured."
-    echo "Consider setting TOR_CONTROL_PASSWORD environment variable."
+    echo "Tor will automatically disable the ControlPort when bound to non-local addresses."
+    echo "Set TOR_CONTROL_PASSWORD environment variable to enable authentication."
 fi
 
 echo ""
