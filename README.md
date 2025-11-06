@@ -1,2 +1,173 @@
 # docker-tor-socks
-Tor Socks proxy sidecar container
+
+Tor SOCKS proxy sidecar container for secure, anonymous networking. This container is configured as a client-only proxy and does NOT function as a relay, exit node, or bridge on the Tor network.
+
+## Features
+
+- 🔒 SOCKS5 proxy on port 9050
+- 🎛️ Control port on port 9051
+- 🐳 Multi-architecture support (amd64, arm64, arm/v7, 386, ppc64le, s390x)
+- 🚫 Client-only mode (does NOT route traffic for others)
+- 📦 Lightweight Alpine-based image
+- 🔄 Perfect for use as a sidecar container
+
+## Quick Start
+
+### Pull from GitHub Container Registry
+
+```bash
+docker pull ghcr.io/andrew-stclair/tor-socks:latest
+```
+
+### Run the Container
+
+```bash
+docker run -d \
+  --name tor-socks \
+  -p 9050:9050 \
+  -p 9051:9051 \
+  ghcr.io/andrew-stclair/tor-socks:latest
+```
+
+### Test the SOCKS Proxy
+
+```bash
+# Using curl with the SOCKS5 proxy
+curl --socks5-hostname localhost:9050 https://check.torproject.org/api/ip
+
+# Using wget with the SOCKS5 proxy
+wget -qO- --proxy=on --socks-server=localhost:9050 https://check.torproject.org/api/ip
+```
+
+## Usage as a Sidecar Container
+
+### Docker Compose Example
+
+```yaml
+version: '3.8'
+
+services:
+  tor-proxy:
+    image: ghcr.io/andrew-stclair/tor-socks:latest
+    container_name: tor-socks
+    restart: unless-stopped
+    ports:
+      - "9050:9050"  # SOCKS proxy port
+      - "9051:9051"  # Control port
+
+  your-app:
+    image: your-app:latest
+    environment:
+      - HTTP_PROXY=socks5h://tor-proxy:9050
+      - HTTPS_PROXY=socks5h://tor-proxy:9050
+    depends_on:
+      - tor-proxy
+```
+
+### Kubernetes Sidecar Example
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: app-with-tor
+spec:
+  containers:
+  - name: your-app
+    image: your-app:latest
+    env:
+    - name: HTTP_PROXY
+      value: "socks5h://localhost:9050"
+    - name: HTTPS_PROXY
+      value: "socks5h://localhost:9050"
+  
+  - name: tor-socks
+    image: ghcr.io/andrew-stclair/tor-socks:latest
+    ports:
+    - containerPort: 9050
+      name: socks
+    - containerPort: 9051
+      name: control
+```
+
+## Configuration
+
+### Exposed Ports
+
+- **9050**: SOCKS5 proxy port
+- **9051**: Control port (for programmatic control of Tor)
+
+### Environment Variables
+
+This container uses the default Tor configuration and doesn't require environment variables. The configuration can be customized by mounting a custom `torrc` file.
+
+### Custom Configuration
+
+To use a custom `torrc` configuration:
+
+```bash
+docker run -d \
+  --name tor-socks \
+  -p 9050:9050 \
+  -p 9051:9051 \
+  -v /path/to/your/torrc:/etc/tor/torrc:ro \
+  ghcr.io/andrew-stclair/tor-socks:latest
+```
+
+## Security Considerations
+
+- This container is configured as a **client-only** Tor proxy
+- It does **NOT** function as a relay, exit node, or bridge
+- The ExitPolicy is set to `reject *:*` to prevent acting as an exit node
+- ORPort is disabled (set to 0)
+- Suitable for use as a privacy-enhancing proxy for your applications
+
+## Building from Source
+
+```bash
+# Clone the repository
+git clone https://github.com/andrew-stclair/docker-tor-socks.git
+cd docker-tor-socks
+
+# Build the image
+docker build -t tor-socks:local .
+
+# Run the locally built image
+docker run -d -p 9050:9050 -p 9051:9051 tor-socks:local
+```
+
+### Multi-Architecture Build
+
+```bash
+# Set up buildx
+docker buildx create --use
+
+# Build for multiple architectures
+docker buildx build \
+  --platform linux/amd64,linux/arm64,linux/arm/v7 \
+  -t tor-socks:multi-arch \
+  --load \
+  .
+```
+
+## Supported Architectures
+
+- linux/amd64 (x86_64)
+- linux/arm64 (aarch64)
+- linux/arm/v7 (armhf)
+- linux/386 (x86)
+- linux/ppc64le (PowerPC 64-bit Little Endian)
+- linux/s390x (IBM Z)
+
+## License
+
+This project is open source and available under the MIT License.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## Acknowledgments
+
+- Built on [Alpine Linux](https://alpinelinux.org/)
+- Uses [Tor Project](https://www.torproject.org/) software
