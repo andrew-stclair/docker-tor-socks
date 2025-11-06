@@ -1,7 +1,7 @@
 FROM alpine:3.19
 
-# Update repositories and install Tor
-RUN apk update && apk add --no-cache tor
+# Install Tor
+RUN apk add --no-cache tor
 
 # Create tor user's home directory for rootless/readonly operation
 RUN mkdir -p /var/lib/tor && \
