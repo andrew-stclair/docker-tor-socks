@@ -178,6 +178,15 @@ docker run -d \
   --cap-drop ALL
   ```
 
+### Network Exposure
+- **SOCKS Port (9050)** and **Control Port (9051)** are bound to `0.0.0.0` by default to allow access from other containers (sidecar pattern)
+- In production environments, consider:
+  - Using Docker network isolation to restrict access
+  - Binding to localhost (`127.0.0.1`) if only local access is needed
+  - Adding authentication to the control port (HashedControlPassword or CookieAuthentication)
+  - Not exposing ports to the host if only inter-container communication is required
+- The control port allows programmatic control of Tor and should be protected in production
+
 ## Building from Source
 
 ```bash
