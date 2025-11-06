@@ -134,7 +134,19 @@ spec:
 
 ### Environment Variables
 
-This container uses the default Tor configuration and doesn't require environment variables. The configuration can be customized by mounting a custom `torrc` file.
+- **`TOR_CONTROL_PASSWORD`** (optional): Set this to enable authentication on the ControlPort (9051). When set, the container will configure Tor to require this password for control port access. This is **strongly recommended** when exposing the control port, especially in sidecar/multi-container scenarios.
+
+  Example:
+  ```bash
+  docker run -d \
+    --name tor-socks \
+    -p 9050:9050 \
+    -p 9051:9051 \
+    -e TOR_CONTROL_PASSWORD=your_secure_password \
+    ghcr.io/andrew-stclair/tor-socks:latest
+  ```
+
+If no environment variables are set, the container uses the default Tor configuration. The configuration can also be customized by mounting a custom `torrc` file.
 
 ### Custom Configuration
 
@@ -184,9 +196,10 @@ docker run -d \
 - In production environments, consider:
   - Using Docker network isolation to restrict access
   - Binding to localhost (`127.0.0.1`) if only local access is needed
-  - Adding authentication to the control port (HashedControlPassword or CookieAuthentication)
+  - **Setting `TOR_CONTROL_PASSWORD` environment variable to enable authentication on the control port (strongly recommended)**
   - Not exposing ports to the host if only inter-container communication is required
 - The control port allows programmatic control of Tor and should be protected in production
+- Without authentication, Tor will disable the control port when bound to non-local addresses for security
 
 ## Building from Source
 
