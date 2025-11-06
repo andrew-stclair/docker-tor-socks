@@ -8,6 +8,9 @@ services:
     ports:
       - "9050:9050"  # SOCKS proxy port
       - "9051:9051"  # Control port
+    environment:
+      # Set a password to enable ControlPort authentication (recommended)
+      - TOR_CONTROL_PASSWORD=your_secure_password_here
     # For readonly filesystem support with tmpfs mounts
     read_only: true
     tmpfs:
