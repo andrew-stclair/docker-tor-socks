@@ -18,12 +18,16 @@ if [ -n "$TOR_CONTROL_PASSWORD" ]; then
     # Generate hashed password
     # Note: Password briefly appears in process args, but in a single-user container
     # environment this is acceptable. The password is never logged or persisted.
-    HASHED_PASSWORD=$(tor --hash-password "$TOR_CONTROL_PASSWORD")
+    HASH_OUTPUT=$(tor --hash-password "$TOR_CONTROL_PASSWORD" 2>&1)
+    HASH_EXIT_CODE=$?
     
-    if [ -z "$HASHED_PASSWORD" ]; then
+    if [ $HASH_EXIT_CODE -ne 0 ] || [ -z "$HASH_OUTPUT" ]; then
         echo "Error: Failed to generate hashed password" >&2
+        echo "$HASH_OUTPUT" >&2
         exit 1
     fi
+    
+    HASHED_PASSWORD="$HASH_OUTPUT"
     
     # Create modified torrc in /tmp (writable with read-only filesystem)
     TORRC_PATH="/tmp/torrc"
