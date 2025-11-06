@@ -6,7 +6,7 @@ Tor SOCKS proxy sidecar container for secure, anonymous networking. This contain
 
 - 🔒 SOCKS5 proxy on port 9050
 - 🎛️ Control port on port 9051
-- 🐳 Multi-architecture support (amd64, arm64, arm/v7, 386, ppc64le, s390x)
+- 🐳 Multi-architecture support (amd64, arm64, arm/v7)
 - 🚫 Client-only mode (does NOT route traffic for others)
 - 📦 Lightweight Alpine-based image
 - 🔄 Perfect for use as a sidecar container
@@ -221,9 +221,8 @@ docker buildx build \
 - linux/amd64 (x86_64)
 - linux/arm64 (aarch64)
 - linux/arm/v7 (armhf)
-- linux/386 (x86)
-- linux/ppc64le (PowerPC 64-bit Little Endian)
-- linux/s390x (IBM Z)
+
+> **Note**: Additional architectures (386, ppc64le, s390x) are not currently supported due to Tor package availability in Alpine Linux repositories.
 
 ## License
 
