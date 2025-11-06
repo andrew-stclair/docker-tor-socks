@@ -10,7 +10,8 @@ services:
       - "9051:9051"  # Control port
     environment:
       # Set a password to enable ControlPort authentication (recommended)
-      - TOR_CONTROL_PASSWORD=your_secure_password_here
+      # WARNING: Set a strong password for TOR_CONTROL_PASSWORD before deploying!
+      # - TOR_CONTROL_PASSWORD=CHANGE_ME_TO_SECURE_PASSWORD  # <-- CHANGE THIS to a strong password!
     # For readonly filesystem support with tmpfs mounts
     read_only: true
     tmpfs:
