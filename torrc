@@ -18,7 +18,6 @@ ControlPort 0.0.0.0:9051
 
 # Disable relay functionality - do NOT route traffic for others
 ORPort 0
-BridgeRelay 0
 ExitRelay 0
 
 # Explicitly disable being an exit node
