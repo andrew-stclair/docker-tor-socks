@@ -165,8 +165,9 @@ docker run -d \
 
 ### Read-Only Filesystem Support
 - Designed to work with `--read-only` flag
-- Writable directories are exposed as volumes:
-  - `/var/lib/tor` - Tor's data directory (state, keys, etc.)
+- Persistent data volume:
+  - `/var/lib/tor` - Tor's data directory (state, keys, etc.) - defined as a volume
+- Writable tmpfs mounts (specified at runtime):
   - `/tmp` - Temporary files (use `--tmpfs /tmp`)
   - `/var/tmp` - Temporary files (use `--tmpfs /var/tmp`)
 - Recommended security hardening:
