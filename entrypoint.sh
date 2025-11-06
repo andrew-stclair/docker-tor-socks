@@ -16,14 +16,27 @@ if [ -n "$TOR_CONTROL_PASSWORD" ]; then
     echo "Configuring ControlPort authentication..."
     
     # Generate hashed password
+    # Note: Password briefly appears in process args, but in a single-user container
+    # environment this is acceptable. The password is never logged or persisted.
     HASHED_PASSWORD=$(tor --hash-password "$TOR_CONTROL_PASSWORD")
+    
+    if [ -z "$HASHED_PASSWORD" ]; then
+        echo "Error: Failed to generate hashed password" >&2
+        exit 1
+    fi
     
     # Create modified torrc in /tmp (writable with read-only filesystem)
     TORRC_PATH="/tmp/torrc"
-    cp /etc/tor/torrc "$TORRC_PATH"
+    if ! cp /etc/tor/torrc "$TORRC_PATH"; then
+        echo "Error: Failed to copy torrc configuration" >&2
+        exit 1
+    fi
     
     # Add HashedControlPassword to the config
-    echo "HashedControlPassword $HASHED_PASSWORD" >> "$TORRC_PATH"
+    if ! echo "HashedControlPassword $HASHED_PASSWORD" >> "$TORRC_PATH"; then
+        echo "Error: Failed to write HashedControlPassword to torrc" >&2
+        exit 1
+    fi
     
     echo "ControlPort authentication enabled"
 else
