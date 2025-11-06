@@ -10,6 +10,8 @@ Tor SOCKS proxy sidecar container for secure, anonymous networking. This contain
 - 🚫 Client-only mode (does NOT route traffic for others)
 - 📦 Lightweight Alpine-based image
 - 🔄 Perfect for use as a sidecar container
+- 🛡️ Rootless operation (runs as non-root 'tor' user)
+- 📖 Read-only filesystem support with tmpfs mounts
 
 ## Quick Start
 
@@ -29,6 +31,22 @@ docker run -d \
   ghcr.io/andrew-stclair/tor-socks:latest
 ```
 
+### Run with Read-only Filesystem (Recommended for Security)
+
+```bash
+docker run -d \
+  --name tor-socks \
+  -p 9050:9050 \
+  -p 9051:9051 \
+  --read-only \
+  --tmpfs /tmp \
+  --tmpfs /var/tmp \
+  -v tor-data:/var/lib/tor \
+  --security-opt no-new-privileges:true \
+  --cap-drop ALL \
+  ghcr.io/andrew-stclair/tor-socks:latest
+```
+
 ### Test the SOCKS Proxy
 
 ```bash
@@ -43,6 +61,8 @@ wget -qO- --proxy=on --socks-server=localhost:9050 https://check.torproject.org/
 
 ### Docker Compose Example
 
+See the included `docker-compose.yml` file for a complete example with read-only filesystem support.
+
 ```yaml
 version: '3.8'
 
@@ -54,6 +74,18 @@ services:
     ports:
       - "9050:9050"  # SOCKS proxy port
       - "9051:9051"  # Control port
+    # For readonly filesystem support with tmpfs mounts
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/tmp
+    volumes:
+      - tor-data:/var/lib/tor
+    # Security options for rootless operation
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
 
   your-app:
     image: your-app:latest
@@ -62,6 +94,9 @@ services:
       - HTTPS_PROXY=socks5h://tor-proxy:9050
     depends_on:
       - tor-proxy
+
+volumes:
+  tor-data:
 ```
 
 ### Kubernetes Sidecar Example
@@ -116,11 +151,32 @@ docker run -d \
 
 ## Security Considerations
 
+### Client-Only Configuration
 - This container is configured as a **client-only** Tor proxy
 - It does **NOT** function as a relay, exit node, or bridge
 - The ExitPolicy is set to `reject *:*` to prevent acting as an exit node
 - ORPort is disabled (set to 0)
 - Suitable for use as a privacy-enhancing proxy for your applications
+
+### Rootless Operation
+- Container runs as the non-root `tor` user (UID/GID defined by Alpine's tor package)
+- No privilege escalation required
+- Compatible with rootless Docker and Podman
+
+### Read-Only Filesystem Support
+- Designed to work with `--read-only` flag
+- Writable directories are exposed as volumes:
+  - `/var/lib/tor` - Tor's data directory (state, keys, etc.)
+  - `/tmp` - Temporary files (use `--tmpfs /tmp`)
+  - `/var/tmp` - Temporary files (use `--tmpfs /var/tmp`)
+- Recommended security hardening:
+  ```bash
+  --read-only \
+  --tmpfs /tmp \
+  --tmpfs /var/tmp \
+  --security-opt no-new-privileges:true \
+  --cap-drop ALL
+  ```
 
 ## Building from Source
 
