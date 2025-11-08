@@ -19,7 +19,7 @@ services:
     networks:
       - tor
 
-  # Example application using the Tor proxy
+  # Production bitcoind deployment using the Tor proxy
   bitcoind:
     command: '-torcontrol=tor-proxy:9051 -torpassword=$TOR_CONTROL_PASSWORD -proxy=tor-proxy:9050'
     image: ghcr.io/andrew-stclair/bitcoind:latest
