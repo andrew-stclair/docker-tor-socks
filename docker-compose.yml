@@ -23,6 +23,8 @@ services:
   bitcoind:
     command: '-torcontrol=tor-proxy:9051 -torpassword=$TOR_CONTROL_PASSWORD -proxy=tor-proxy:9050'
     image: ghcr.io/andrew-stclair/bitcoind:latest
+    environment:
+      - TOR_CONTROL_PASSWORD=${TOR_CONTROL_PASSWORD}
     restart: unless-stopped
     volumes:
       - bitcoin-data:/bitcoin
