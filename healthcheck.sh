@@ -31,5 +31,13 @@ fi
 # If the external check fails, it could be due to network issues or Tor still bootstrapping
 # As a fallback, verify basic functionality is present (process running + port listening)
 # This prevents false negatives during temporary network issues
-echo "WARNING: Tor SOCKS proxy is running but external connectivity test failed (may still be bootstrapping)"
-exit 0
+# Allow fallback only during initial grace period after container startup
+GRACE_PERIOD=60  # seconds
+UPTIME=$(awk '{print int($1)}' /proc/uptime)
+if [ "$UPTIME" -lt "$GRACE_PERIOD" ]; then
+    echo "WARNING: Tor SOCKS proxy is running but external connectivity test failed (may still be bootstrapping; within grace period)"
+    exit 0
+else
+    echo "ERROR: Tor SOCKS proxy is running but cannot connect to the Tor network (outside grace period)"
+    exit 1
+fi
