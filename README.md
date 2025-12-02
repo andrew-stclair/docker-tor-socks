@@ -12,6 +12,7 @@ Tor SOCKS proxy sidecar container for secure, anonymous networking. This contain
 - 🔄 Perfect for use as a sidecar container
 - 🛡️ Rootless operation (runs as non-root 'tor' user)
 - 📖 Read-only filesystem support with tmpfs mounts
+- ❤️ Built-in health check to verify Tor connectivity
 
 ## Quick Start
 
@@ -57,6 +58,29 @@ curl --socks5-hostname localhost:9050 https://check.torproject.org/api/ip
 wget -qO- --proxy=on --socks-server=localhost:9050 https://check.torproject.org/api/ip
 ```
 
+### Health Check
+
+The container includes a built-in health check that verifies:
+1. The Tor process is running
+2. The SOCKS port (9050) is listening
+3. Tor is connected to the network and can route traffic
+
+The health check runs every 60 seconds with a 90-second grace period on startup to allow Tor to bootstrap. You can view the health status with:
+
+```bash
+# Check health status
+docker ps --format "table {{.Names}}\t{{.Status}}"
+
+# View detailed health check logs
+docker inspect tor-socks --format='{{json .State.Health}}' | jq
+```
+
+Health check parameters:
+- **Interval**: 60 seconds
+- **Timeout**: 15 seconds
+- **Start Period**: 90 seconds (grace period for Tor to bootstrap)
+- **Retries**: 3 consecutive failures before marking as unhealthy
+
 ## Usage as a Sidecar Container
 
 ### Docker Compose Example
@@ -93,7 +117,8 @@ services:
       - HTTP_PROXY=socks5h://tor-proxy:9050
       - HTTPS_PROXY=socks5h://tor-proxy:9050
     depends_on:
-      - tor-proxy
+      tor-proxy:
+        condition: service_healthy  # Wait for Tor to be healthy before starting
 
 volumes:
   tor-data:
@@ -123,6 +148,22 @@ spec:
       name: socks
     - containerPort: 9051
       name: control
+    livenessProbe:
+      exec:
+        command:
+        - /healthcheck.sh
+      initialDelaySeconds: 90
+      periodSeconds: 60
+      timeoutSeconds: 15
+      failureThreshold: 3
+    readinessProbe:
+      exec:
+        command:
+        - /healthcheck.sh
+      initialDelaySeconds: 90
+      periodSeconds: 30
+      timeoutSeconds: 15
+      failureThreshold: 3
 ```
 
 ## Configuration
