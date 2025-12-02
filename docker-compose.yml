@@ -18,6 +18,13 @@ services:
       - ALL
     networks:
       - tor
+    # Health check is defined in the Dockerfile, but can be customized here if needed
+    # healthcheck:
+    #   test: ["CMD", "/healthcheck.sh"]
+    #   interval: 60s
+    #   timeout: 12s
+    #   start_period: 90s
+    #   retries: 3
 
   # Production bitcoind deployment using the Tor proxy
   bitcoind:
@@ -39,7 +46,8 @@ services:
     read_only: true
     container_name: bitcoind
     depends_on:
-      - tor-proxy
+      tor-proxy:
+        condition: service_healthy
     networks:
       - default
       - tor
