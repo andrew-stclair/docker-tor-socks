@@ -20,7 +20,7 @@ services:
       - tor
     # Health check is defined in the Dockerfile, but can be customized here if needed
     # healthcheck:
-    #   test: ["/healthcheck.sh"]
+    #   test: ["CMD", "/healthcheck.sh"]
     #   interval: 60s
     #   timeout: 12s
     #   start_period: 90s

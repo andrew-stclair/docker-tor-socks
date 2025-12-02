@@ -5,8 +5,6 @@
 # 2. The SOCKS port (9050) is listening
 # 3. Tor has successfully bootstrapped and connected to the network
 
-set -e
-
 # Check if Tor process is running
 if ! pgrep -x tor > /dev/null; then
     echo "ERROR: Tor process is not running"

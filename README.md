@@ -63,8 +63,9 @@ wget -qO- --proxy=on --socks-server=localhost:9050 https://check.torproject.org/
 The container includes a built-in health check that verifies:
 1. The Tor process is running
 2. The SOCKS port (9050) is listening
-3. Tor is connected to the network and can route traffic
+3. Tor is connected to the network and can route traffic (connectivity test)
 
+**Note:** If the connectivity test fails, the health check falls back to considering the container healthy as long as the Tor process and SOCKS port are working. This ensures the container remains healthy in environments where external network access may be restricted, but Tor is still operational.
 The health check runs every 60 seconds with a 90-second grace period on startup to allow Tor to bootstrap. You can view the health status with:
 
 ```bash
