@@ -6,7 +6,7 @@
 # 3. Tor has successfully bootstrapped and connected to the network
 
 # Check if Tor process is running
-if ! pgrep -x tor > /dev/null; then
+if ! pidof tor > /dev/null; then
     echo "ERROR: Tor process is not running"
     exit 1
 fi
@@ -21,7 +21,7 @@ fi
 # Check Tor connectivity by attempting a SOCKS connection to an external service
 # This verifies that Tor has bootstrapped and can route traffic through the network
 # Use a short timeout to avoid blocking the health check
-if curl --socks5-hostname localhost:9050 --max-time 10 --silent --fail https://check.torproject.org/ > /dev/null 2>&1; then
+if curl --socks5-hostname localhost:9050 --max-time 10 --silent --show-error --fail https://check.torproject.org/ > /dev/null 2>&1; then
     echo "OK: Tor SOCKS proxy is healthy and connected to the Tor network"
     exit 0
 fi
