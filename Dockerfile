@@ -29,7 +29,7 @@ VOLUME ["/var/lib/tor"]
 USER tor
 
 # Health check to verify Tor SOCKS proxy is running and connected
-HEALTHCHECK --interval=60s --timeout=15s --start-period=90s --retries=3 \
+HEALTHCHECK --interval=60s --timeout=12s --start-period=90s --retries=3 \
     CMD ["/healthcheck.sh"]
 
 # Set entrypoint

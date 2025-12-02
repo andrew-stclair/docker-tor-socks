@@ -77,7 +77,7 @@ docker inspect tor-socks --format='{{json .State.Health}}' | jq
 
 Health check parameters:
 - **Interval**: 60 seconds
-- **Timeout**: 15 seconds
+- **Timeout**: 12 seconds
 - **Start Period**: 90 seconds (grace period for Tor to bootstrap)
 - **Retries**: 3 consecutive failures before marking as unhealthy
 
@@ -154,7 +154,7 @@ spec:
         - /healthcheck.sh
       initialDelaySeconds: 90
       periodSeconds: 60
-      timeoutSeconds: 15
+      timeoutSeconds: 12
       failureThreshold: 3
     readinessProbe:
       exec:
@@ -162,7 +162,7 @@ spec:
         - /healthcheck.sh
       initialDelaySeconds: 90
       periodSeconds: 30
-      timeoutSeconds: 15
+      timeoutSeconds: 12
       failureThreshold: 3
 ```
 
